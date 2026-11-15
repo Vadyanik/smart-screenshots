@@ -39,6 +39,9 @@ public final class SmartShotsConfig {
 	/** Min time between two meeting shots; newcomers seen meanwhile share one shot after it. */
 	public int meetCooldownSeconds = 30;
 
+	/** Worlds / servers / sub-worlds where new players are ignored (see storage.MeetBlacklist). */
+	public java.util.List<String> meetBlacklist = new java.util.ArrayList<>();
+
 	/** Record visible blocks / entities / players for search. */
 	public boolean sceneAnalysis = true;
 
@@ -178,6 +181,9 @@ public final class SmartShotsConfig {
 		archiveAfterDays = Math.clamp(archiveAfterDays, 7, 365);
 		meetGatherSeconds = Math.clamp(meetGatherSeconds, 0f, 5f);
 		meetCooldownSeconds = Math.clamp(meetCooldownSeconds, 0, 300);
+		if (meetBlacklist == null) {
+			meetBlacklist = new java.util.ArrayList<>();
+		}
 		if (autoNotify == null) {
 			autoNotify = Notify.TOAST;
 		}

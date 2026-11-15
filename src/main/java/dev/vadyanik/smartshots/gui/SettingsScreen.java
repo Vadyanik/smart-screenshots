@@ -88,6 +88,11 @@ public class SettingsScreen extends Screen {
 		y = add(gather, y);
 		y = add(choiceSlider("meet_cooldown", MEET_COOLDOWNS, c.meetCooldownSeconds,
 			sec -> Component.translatable("smartshots.settings.seconds", sec).getString(), v -> c.meetCooldownSeconds = v), y);
+		var place = dev.vadyanik.smartshots.storage.MeetBlacklist.current(Minecraft.getInstance());
+		if (place != null) {
+			y = add(blockToggle("meet_block_sub", place.subKey(), place.subName()), y);
+			y = add(blockToggle("meet_block_all", place.instanceKey(), place.instanceName()), y);
+		}
 		y = add(new ForgetRow(colX, colW), y);
 
 		y = section(y, "smartshots.settings.section.manual");
@@ -194,6 +199,13 @@ public class SettingsScreen extends Screen {
 	private FlatToggle toggle(String key, java.util.function.Supplier<Boolean> get, java.util.function.Consumer<Boolean> set) {
 		return new FlatToggle(colX, 0, colW, Component.translatable("smartshots.settings." + key),
 			Component.translatable("smartshots.settings." + key + ".tooltip"), get, set);
+	}
+
+	private FlatToggle blockToggle(String key, String entry, String name) {
+		return new FlatToggle(colX, 0, colW, Component.translatable("smartshots.settings." + key, name),
+			Component.translatable("smartshots.settings." + key + ".tooltip"),
+			() -> dev.vadyanik.smartshots.storage.MeetBlacklist.contains(entry),
+			v -> dev.vadyanik.smartshots.storage.MeetBlacklist.set(entry, v));
 	}
 
 	private int section(int y, String key) {

@@ -64,6 +64,10 @@ public final class PlayerMeet {
 			reset();
 			return;
 		}
+		if (dev.vadyanik.smartshots.storage.MeetBlacklist.isBlocked(mc)) {
+			reset();
+			return;
+		}
 		if (ticks++ % REFRESH_EVERY == 0 || !SeenPlayers.ready()) {
 			SeenPlayers.refresh(); // picks up players met in other instances; no-op when the file is unchanged
 		}

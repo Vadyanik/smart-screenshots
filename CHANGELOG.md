@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.0+mc26.3
+- New-player detection can be switched off per place: in Settings (while in a world) ignore the current
+  sub-world (e.g. a server lobby) or the whole server / world. Nothing is shot or remembered there.
+
 ## 1.9.2+mc26.3
 - Fix: crash (ConcurrentModificationException) when opening the viewer with a named-entity chip; icon cache no longer
   uses computeIfAbsent with a recursive lookup.
