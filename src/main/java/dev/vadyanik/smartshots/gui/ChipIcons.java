@@ -96,13 +96,19 @@ final class ChipIcons {
 	}
 
 	private static Object resolve(String key) {
-		return CACHE.computeIfAbsent(key, k -> {
-			try {
-				return find(k);
-			} catch (Exception e) {
-				return NONE;
-			}
-		});
+		// Not computeIfAbsent: find() recurses into resolve() for named entities.
+		Object cached = CACHE.get(key);
+		if (cached != null) {
+			return cached;
+		}
+		Object found;
+		try {
+			found = find(key);
+		} catch (Exception e) {
+			found = NONE;
+		}
+		CACHE.put(key, found);
+		return found;
 	}
 
 	private static Object find(String key) {

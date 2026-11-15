@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.2+mc26.3
+- Fix: crash (ConcurrentModificationException) when opening the viewer with a named-entity chip; icon cache no longer
+  uses computeIfAbsent with a recursive lookup.
+
 ## 1.9.1+mc26.3
 - Fix: the gallery stayed on "Loading…" forever when opened from the main menu (item names need a loaded
   world in 26.3); a failed scan now shows an error instead of loading forever.
