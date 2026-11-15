@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.3+mc26.3
+- Auto shots are taken on round wall-clock times (every 10 min: 19:10, 19:20...; every 5 min: 19:05, 19:10...).
+  Boundaries missed during a pause/menu/unfocus collapse into one shot when you're back.
+
 ## 1.10.2+mc26.3
 - Auto shots now run on real time: every N real minutes. If a menu is open, the game is paused or the window
   is unfocused when it's due, the shot is taken right as you're back in the game.

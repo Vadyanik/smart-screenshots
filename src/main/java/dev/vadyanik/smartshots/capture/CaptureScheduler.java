@@ -8,6 +8,9 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +23,15 @@ public final class CaptureScheduler {
 	private static Pending pending;
 	/** Real-time (ms) moment the next interval shot is due; 0 = not scheduled yet. */
 	private static long nextAutoAt;
+	private static int scheduledMinutes;
+
+	/** Next wall-clock moment (local time, counted from midnight) that is a multiple of the interval: 19:10, 19:20... */
+	private static long nextBoundary(long now, int minutes) {
+		ZonedDateTime t = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault());
+		long step = Math.max(1, minutes) * 60_000L;
+		long sinceMidnight = now - t.toLocalDate().atStartOfDay(t.getZone()).toInstant().toEpochMilli();
+		return now - sinceMidnight + (sinceMidnight / step + 1) * step;
+	}
 	private static Vec3 lastAutoPos;
 	private static float lastAutoYaw;
 	private static String lastAutoDim;
@@ -114,9 +126,9 @@ public final class CaptureScheduler {
 			return;
 		}
 		long now = System.currentTimeMillis();
-		long interval = cfg.autoIntervalMinutes * 60_000L;
-		if (nextAutoAt == 0) {
-			nextAutoAt = now + interval;
+		if (nextAutoAt == 0 || scheduledMinutes != cfg.autoIntervalMinutes) {
+			scheduledMinutes = cfg.autoIntervalMinutes;
+			nextAutoAt = nextBoundary(now, scheduledMinutes);
 		}
 		if (now < nextAutoAt) {
 			return;
@@ -126,7 +138,7 @@ public final class CaptureScheduler {
 		if (mc.gui.screen() != null || mc.isPaused() || !mc.isWindowActive() || pending != null) {
 			return;
 		}
-		nextAutoAt = now + interval;
+		nextAutoAt = nextBoundary(now, scheduledMinutes);
 		Vec3 pos = mc.player.position();
 		String dim = mc.level.dimension().identifier().toString();
 		if (cfg.autoSkipIdle && lastAutoPos != null && dim.equals(lastAutoDim)
@@ -156,8 +168,8 @@ public final class CaptureScheduler {
 		if (!cfg.autoEnabled) {
 			return -1;
 		}
-		if (nextAutoAt == 0) {
-			return cfg.autoIntervalMinutes * 60;
+		if (nextAutoAt == 0 || scheduledMinutes != cfg.autoIntervalMinutes) {
+			return (int) Math.max(0, (nextBoundary(System.currentTimeMillis(), cfg.autoIntervalMinutes) - System.currentTimeMillis()) / 1000);
 		}
 		return (int) Math.max(0, (nextAutoAt - System.currentTimeMillis()) / 1000);
 	}
