@@ -1,0 +1,11 @@
+{
+	"schemaVersion": 1,
+	"id": "smartshots-test",
+	"version": "1.0.0",
+	"name": "Smart Screenshots menu tour",
+	"environment": "client",
+	"entrypoints": {
+		"fabric-client-gametest": ["dev.vadyanik.smartshots.test.MenuTourTest"]
+	},
+	"depends": {"smartshots": "*"}
+}

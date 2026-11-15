@@ -1,0 +1,22 @@
+{
+	"required": true,
+	"package": "dev.vadyanik.smartshots.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"BiomeManagerAccessor",
+		"ChatComponentAccessor",
+		"FontAccessor",
+		"ClientAdvancementsMixin",
+		"GameRendererMixin",
+		"GlCommandEncoderMixin",
+		"MinecraftMixin",
+		"PauseScreenMixin",
+		"TitleScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

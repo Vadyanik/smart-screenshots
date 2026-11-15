@@ -1,0 +1,64 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+// Jar / mod version: <semver from gradle.properties>+mc<minecraft version>, e.g. 1.1.0+mc26.3
+version = "${project.version}+mc${project.minecraft_version}"
+
+base {
+	archivesName = project.name
+}
+
+repositories {
+}
+
+loom {
+	mods {
+		"smartshots" {
+			sourceSet sourceSets.main
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+	it.options.encoding = "UTF-8"
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+// Client game test that walks through every menu and saves screenshots (./gradlew runClientGameTest)
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "smartshots-test"
+		enableGameTests = false
+		enableClientGameTests = true
+		eula = true
+	}
+}
+
+tasks.matching { it.name == "runClientGameTest" }.configureEach {
+	// Allows overriding the SDL video driver for the screenshot tour (e.g. SDL_VIDEO_DRIVER=wayland).
+	if (System.getenv("TOUR_SDL_DRIVER") != null) {
+		environment "SDL_VIDEO_DRIVER", System.getenv("TOUR_SDL_DRIVER")
+	}
+}

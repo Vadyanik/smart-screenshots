@@ -1,0 +1,21 @@
+{
+	"schemaVersion": 1,
+	"id": "smartshots",
+	"version": "${version}",
+	"name": "Smart Screenshots",
+	"description": "Screenshots sorted by server and world, automatic memory shots, advancement shots, scene-aware search and an in-game gallery.",
+	"authors": ["vadyanik"],
+	"license": "MIT",
+	"icon": "assets/smartshots/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["dev.vadyanik.smartshots.SmartShots"]
+	},
+	"mixins": ["smartshots.mixins.json"],
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
