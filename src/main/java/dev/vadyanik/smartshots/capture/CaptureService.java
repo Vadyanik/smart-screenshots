@@ -57,6 +57,8 @@ public final class CaptureService {
 	/** Frame finished; the color is read between frames (see {@link #readFinishedFrames}). */
 	private static final List<Request> FINISHED = new ArrayList<>();
 	private static boolean inFrame;
+	/** Depth grabbed this frame before the "always on top" pass cleared it, or null. */
+	private static EarlyDepth earlyDepth;
 	private static volatile boolean warnedBlackClean;
 
 	private CaptureService() {
@@ -158,6 +160,55 @@ public final class CaptureService {
 	public static void onFrameStart() {
 		readFinishedFrames(Minecraft.getInstance());
 		inFrame = true;
+		earlyDepth = null;
+	}
+
+	/**
+	 * Inside the level's main pass, right before the "always on top" features (chunk borders,
+	 * debug gizmos): that pass clears the depth buffer, so a pending shot reads it now.
+	 */
+	public static void beforeAlwaysOnTop(RenderTarget main) {
+		if (!inFrame || earlyDepth != null || !SmartShotsConfig.get().sceneAnalysis) {
+			return;
+		}
+		boolean waiting = false;
+		for (Request r : PENDING) {
+			waiting |= !r.analyzed;
+		}
+		if (!waiting || main == null || main.getDepthTexture() == null) {
+			return;
+		}
+		EarlyDepth e = new EarlyDepth();
+		try {
+			GpuReadback.depth(main.getDepthTexture(), e::arrive);
+			earlyDepth = e;
+		} catch (Exception ex) {
+			SmartShots.LOGGER.warn("Early depth capture failed", ex);
+		}
+	}
+
+	/** A depth readback taken earlier in the frame; hands the result to whoever asks (render thread). */
+	private static final class EarlyDepth {
+		private final List<java.util.function.Consumer<float[]>> waiting = new ArrayList<>();
+		private boolean arrived;
+		private float[] depth;
+
+		void arrive(float[] d) {
+			arrived = true;
+			depth = d;
+			for (var c : waiting) {
+				c.accept(d);
+			}
+			waiting.clear();
+		}
+
+		void then(java.util.function.Consumer<float[]> c) {
+			if (arrived) {
+				c.accept(depth);
+			} else {
+				waiting.add(c);
+			}
+		}
 	}
 
 	/** The level is rendered; the hand and HUD are not yet. {@code projection} is the one actually used (bobbing, nausea...). */
@@ -212,7 +263,11 @@ public final class CaptureService {
 			FrameView view = FrameView.of(projection, camera, target.width, target.height,
 				renderer.gameRenderState().levelRenderState.worldPartialTicks);
 			MaskJob job = new MaskJob(mc.level, view, EntitySnapshot.take(mc, view), mc.level.dimensionType().hasSkyLight());
-			GpuReadback.depth(target.getDepthTexture(), job::onDepth);
+			if (earlyDepth != null) {
+				earlyDepth.then(job::onDepth);
+			} else {
+				GpuReadback.depth(target.getDepthTexture(), job::onDepth);
+			}
 			return job;
 		} catch (Exception e) {
 			SmartShots.LOGGER.warn("Depth capture failed, the shot gets no mask", e);
@@ -223,6 +278,7 @@ public final class CaptureService {
 	/** End of the frame: everything (GUI included) is in the main target. */
 	public static void onFrameEnd(GameRenderer renderer) {
 		inFrame = false;
+		earlyDepth = null;
 		if (PENDING.isEmpty()) {
 			return;
 		}

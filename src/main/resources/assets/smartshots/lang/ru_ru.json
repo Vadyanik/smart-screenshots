@@ -147,6 +147,7 @@
   "smartshots.info.items": "Предметы",
   "smartshots.info.hint": "ЛКМ — подсветить · Shift+ЛКМ — искать на всех скринах",
   "smartshots.info.no_mask": "Для этого снимка подсветка недоступна · Shift+ЛКМ — искать на всех скринах",
+  "smartshots.info.not_on_shot": "Не видно на этом снимке, подсвечивать нечего · Shift+ЛКМ — искать на всех скринах",
   "smartshots.viewer.pick_hint": "ЛКМ — подсветить · Shift+ЛКМ — искать на всех скринах",
   "smartshots.tag.freecam": "Фрикам",
   "smartshots.trigger.freecam": "Фрикам",

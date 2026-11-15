@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.10.1+mc26.3
+- Fix: highlighting found nothing (or only a few stray lines) on shots taken with chunk borders (F3+G) or
+  other debug overlays on: their pass clears the depth buffer, so the mask is now read just before it.
+- Viewer: chips of things not visible on the shot (e.g. a met player behind you) are dimmed and explain
+  why clicking them doesn't highlight anything.
+
 ## 1.10.0+mc26.3
 - New-player detection can be switched off per place: in Settings (while in a world) ignore the current
   sub-world (e.g. a server lobby) or the whole server / world. Nothing is shot or remembered there.

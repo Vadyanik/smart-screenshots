@@ -147,6 +147,7 @@
   "smartshots.info.items": "Items",
   "smartshots.info.hint": "LMB — highlight · Shift+LMB — find on all shots",
   "smartshots.info.no_mask": "Highlighting isn't available for this shot · Shift+LMB — find on all shots",
+  "smartshots.info.not_on_shot": "Not visible on this shot, nothing to highlight · Shift+LMB — find on all shots",
   "smartshots.viewer.pick_hint": "LMB — highlight · Shift+LMB — find on all shots",
   "smartshots.tag.freecam": "Freecam",
   "smartshots.trigger.freecam": "Freecam",

@@ -146,6 +146,11 @@ final class Highlights {
 			&& System.currentTimeMillis() - s.meta.time >= MASK_WAIT_MS;
 	}
 
+	/** True once the mask of the current shot is loaded. */
+	static boolean loaded() {
+		return mask != null;
+	}
+
 	/** Whether the loaded mask of the current shot has pixels for {@code key}. */
 	static boolean has(String key) {
 		return mask != null && key != null && maskKeys.contains(key);

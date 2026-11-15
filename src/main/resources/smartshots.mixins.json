@@ -9,6 +9,7 @@
 		"ClientAdvancementsMixin",
 		"GameRendererMixin",
 		"GlCommandEncoderMixin",
+		"LevelRendererMixin",
 		"MinecraftMixin",
 		"PauseScreenMixin",
 		"TitleScreenMixin"

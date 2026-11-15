@@ -668,8 +668,12 @@ public class ViewerScreen extends Screen {
 				y += h + 3;
 			}
 			boolean overChip = mouseX >= x && mouseX < x + cw && mouseY >= y && mouseY < y + h && mouseY > TOP_H;
+			// The mask is loaded but has no pixels for it: listed (met nearby, behind a wall...) yet not visible.
+			boolean absent = c.key != null && Highlights.loaded() && !Highlights.has(c.key);
 			boolean hover = overChip;
-			if (overChip && styled != null) {
+			if (overChip && absent) {
+				g.setTooltipForNextFrame(font, font.split(Component.translatable("smartshots.info.not_on_shot"), 200), mouseX, mouseY);
+			} else if (overChip && styled != null) {
 				g.setTooltipForNextFrame(font, Component.literal(c.label), mouseX, mouseY); // the plain nick
 			}
 			boolean selected = c.key != null && highlighted(m, c.key);
@@ -682,10 +686,11 @@ public class ViewerScreen extends Screen {
 			} else {
 				Ui.icon(g, Ui.DOT, x + 5, y + (h - 5) / 2, 5, 5, c.color);
 			}
-			if (styled != null) {
-				g.text(font, styled, x + lead, y + (h - 8) / 2, hover || selected ? Theme.TEXT : Theme.TEXT_DIM, false);
+			int textColor = absent ? Theme.TEXT_FAINT : hover || selected ? Theme.TEXT : Theme.TEXT_DIM;
+			if (styled != null && !absent) {
+				g.text(font, styled, x + lead, y + (h - 8) / 2, textColor, false);
 			} else {
-				g.text(font, label, x + lead, y + (h - 8) / 2, hover || selected ? Theme.TEXT : Theme.TEXT_DIM, false);
+				g.text(font, styled != null ? styled : Component.literal(label).getVisualOrderText(), x + lead, y + (h - 8) / 2, textColor, false);
 			}
 			tagChips.add(new TagChip(x, y, cw, h, c.query, c.key));
 			x += cw + 3;
