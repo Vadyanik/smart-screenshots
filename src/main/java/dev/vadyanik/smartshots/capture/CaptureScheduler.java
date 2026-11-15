@@ -18,7 +18,8 @@ import java.util.List;
  */
 public final class CaptureScheduler {
 	private static Pending pending;
-	private static int activeTicks;
+	/** Real-time (ms) moment the next interval shot is due; 0 = not scheduled yet. */
+	private static long nextAutoAt;
 	private static Vec3 lastAutoPos;
 	private static float lastAutoYaw;
 	private static String lastAutoDim;
@@ -73,7 +74,7 @@ public final class CaptureScheduler {
 		if (!CaptureService.canCapture(mc)) {
 			pending = null;
 			ShotToast.suppressed = false;
-			activeTicks = 0;
+			nextAutoAt = 0;
 			PlayerMeet.reset();
 			return;
 		}
@@ -109,21 +110,23 @@ public final class CaptureScheduler {
 	private static void tickAuto(Minecraft mc) {
 		SmartShotsConfig cfg = SmartShotsConfig.get();
 		if (!cfg.autoEnabled) {
-			activeTicks = 0;
+			nextAutoAt = 0;
 			return;
 		}
-		// Count only time actually spent playing (no menus, window focused).
-		if (mc.gui.screen() != null || mc.isPaused() || !mc.isWindowActive()) {
+		long now = System.currentTimeMillis();
+		long interval = cfg.autoIntervalMinutes * 60_000L;
+		if (nextAutoAt == 0) {
+			nextAutoAt = now + interval;
+		}
+		if (now < nextAutoAt) {
 			return;
 		}
-		activeTicks++;
-		if (activeTicks < cfg.autoIntervalMinutes * 60 * 20) {
+		// Due (real time). In a menu, paused or unfocused the shot just waits and fires the
+		// moment the player is back in the game.
+		if (mc.gui.screen() != null || mc.isPaused() || !mc.isWindowActive() || pending != null) {
 			return;
 		}
-		activeTicks = 0;
-		if (pending != null) {
-			return;
-		}
+		nextAutoAt = now + interval;
 		Vec3 pos = mc.player.position();
 		String dim = mc.level.dimension().identifier().toString();
 		if (cfg.autoSkipIdle && lastAutoPos != null && dim.equals(lastAutoDim)
@@ -153,7 +156,10 @@ public final class CaptureScheduler {
 		if (!cfg.autoEnabled) {
 			return -1;
 		}
-		return Math.max(0, (cfg.autoIntervalMinutes * 60 * 20 - activeTicks) / 20);
+		if (nextAutoAt == 0) {
+			return cfg.autoIntervalMinutes * 60;
+		}
+		return (int) Math.max(0, (nextAutoAt - System.currentTimeMillis()) / 1000);
 	}
 
 	public static void notifyAutoToggled(Minecraft mc, boolean enabled) {

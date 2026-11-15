@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.2+mc26.3
+- Auto shots now run on real time: every N real minutes. If a menu is open, the game is paused or the window
+  is unfocused when it's due, the shot is taken right as you're back in the game.
+
 ## 1.10.1+mc26.3
 - Fix: highlighting found nothing (or only a few stray lines) on shots taken with chunk borders (F3+G) or
   other debug overlays on: their pass clears the depth buffer, so the mask is now read just before it.
