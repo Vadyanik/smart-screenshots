@@ -30,6 +30,17 @@ public final class SearchDoc {
 	public final List<String> misc = new ArrayList<>();
 	public final Trigger trigger;
 
+	private SearchDoc(Trigger trigger) {
+		this.trigger = trigger;
+	}
+
+	/** A doc with just the file name, for a shot whose metadata couldn't be indexed. */
+	public static SearchDoc empty(Library.Shot shot) {
+		SearchDoc d = new SearchDoc(shot.meta.trigger());
+		d.misc.add(lc(shot.file.getFileName().toString()));
+		return d;
+	}
+
 	public SearchDoc(Library.Shot shot) {
 		ShotMeta m = shot.meta;
 		trigger = m.trigger();

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9.1+mc26.3
+- Fix: the gallery stayed on "Loading…" forever when opened from the main menu (item names need a loaded
+  world in 26.3); a failed scan now shows an error instead of loading forever.
+- Settings: descriptions wrap onto more lines instead of being cut off; segmented choices no longer cover them.
+- Settings: sliders follow the mouse on the track (clicking the title no longer changes the value), all tracks
+  line up, discrete sliders show notches.
+
 ## 1.9.0+mc26.3
 - Chat on screenshots is remembered (the messages visible at that moment) and searchable: plain search or
   `chat:` / `чат:`; shown in the viewer's info panel ("Chat").

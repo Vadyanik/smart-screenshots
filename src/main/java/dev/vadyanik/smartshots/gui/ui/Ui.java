@@ -102,4 +102,23 @@ public final class Ui {
 		}
 		return font.plainSubstrByWidth(s, Math.max(0, maxW - font.width("…"))) + "…";
 	}
+
+	/** Height of a settings row whose description wraps to fit {@code textW}: 30 for one line, +10 per extra line. */
+	public static int rowHeight(Font font, String description, int textW) {
+		int lines = description == null || description.isEmpty() ? 1 : Math.max(1, font.split(net.minecraft.network.chat.Component.literal(description), Math.max(20, textW)).size());
+		return 20 + 10 * lines;
+	}
+
+	/** Title (ellipsized) and a wrapped description, as in every settings row. */
+	public static void rowText(GuiGraphicsExtractor g, Font font, String title, String description, int color, int x, int y, int textW) {
+		g.text(font, ellipsize(font, title, textW), x, y + 6, Theme.TEXT, false);
+		if (description == null || description.isEmpty()) {
+			return;
+		}
+		int ly = y + 17;
+		for (var line : font.split(net.minecraft.network.chat.Component.literal(description), Math.max(20, textW))) {
+			g.text(font, line, x, ly, color, false);
+			ly += 10;
+		}
+	}
 }

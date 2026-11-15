@@ -28,6 +28,7 @@
   "smartshots.sidebar.others": "Other instances",
   "smartshots.gallery.title": "Screenshots",
   "smartshots.gallery.loading": "Loading…",
+  "smartshots.gallery.scan_failed": "Couldn't read the screenshots folder (see the log)",
   "smartshots.gallery.empty": "Nothing here yet — press F2 in game",
   "smartshots.gallery.no_results": "Nothing found",
   "smartshots.gallery.search_help": "Try: player:Name · block:diamond · mob:dog · item:sword · sign:home · chat:gg · type:auto · freecam",

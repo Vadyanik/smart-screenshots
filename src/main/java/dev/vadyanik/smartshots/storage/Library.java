@@ -93,11 +93,21 @@ public final class Library {
 				p = p.parent;
 			}
 			this.pack = p;
-			this.doc = new SearchDoc(this);
+			this.doc = makeDoc();
 		}
 
 		public void refreshDoc() {
-			doc = new SearchDoc(this);
+			doc = makeDoc();
+		}
+
+		/** One odd shot must not break the whole gallery: it just isn't searchable then. */
+		private SearchDoc makeDoc() {
+			try {
+				return new SearchDoc(this);
+			} catch (RuntimeException e) {
+				SmartShots.LOGGER.warn("Couldn't index {}", file, e);
+				return SearchDoc.empty(this);
+			}
 		}
 
 		public Node instance() {
@@ -284,7 +294,8 @@ public final class Library {
 			return;
 		}
 		meta.self = false;
-		var user = net.minecraft.client.Minecraft.getInstance().getUser();
+		var mc = net.minecraft.client.Minecraft.getInstance();
+		var user = mc == null ? null : mc.getUser();
 		String name = user == null ? null : user.getName();
 		if (name != null && !name.isEmpty() && !meta.players.contains(name)) {
 			meta.players.add(name);

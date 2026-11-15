@@ -76,6 +76,7 @@ public class GalleryScreen extends Screen {
 
 	private static @Nullable GalleryScreen open;
 	static @Nullable Library library;
+	private static @Nullable String scanError;
 	private static boolean dirty = true;
 	private static @Nullable CompletableFuture<Library> scanning;
 
@@ -229,7 +230,13 @@ public class GalleryScreen extends Screen {
 		}
 		dirty = false;
 		scanning = CompletableFuture.supplyAsync(() -> Library.scan(ScreenshotStore.root()), ScreenshotStore.IO);
-		scanning.thenAccept(lib -> minecraft.execute(() -> {
+		scanning.whenComplete((lib, err) -> minecraft.execute(() -> {
+			if (err != null) {
+				dev.vadyanik.smartshots.SmartShots.LOGGER.error("Couldn't scan the screenshots folder", err);
+				scanError = String.valueOf(err.getCause() != null ? err.getCause() : err);
+				return;
+			}
+			scanError = null;
 			lib.attachOthers(others);
 			library = lib;
 			if (open != null) {
@@ -861,6 +868,11 @@ public class GalleryScreen extends Screen {
 		int cx = gridX + gridW / 2;
 		int cy = gridY + gridH / 2;
 		if (library == null) {
+			if (scanError != null) {
+				g.centeredText(font, Component.translatable("smartshots.gallery.scan_failed"), cx, cy - 6, Theme.TEXT_DIM);
+				g.centeredText(font, font.plainSubstrByWidth(scanError, gridW - 20), cx, cy + 8, Theme.TEXT_FAINT);
+				return null;
+			}
 			g.centeredText(font, Component.translatable("smartshots.gallery.loading"), cx, cy, Theme.TEXT_FAINT);
 			return null;
 		}

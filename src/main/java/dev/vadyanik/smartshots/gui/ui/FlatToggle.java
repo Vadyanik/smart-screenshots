@@ -19,6 +19,11 @@ public class FlatToggle extends Button {
 		this.get = get;
 		this.description = description;
 		this.anim = get.get() ? 1 : 0;
+		setHeight(Ui.rowHeight(Minecraft.getInstance().font, description.getString(), textWidth(w)));
+	}
+
+	private static int textWidth(int w) {
+		return w - 22 - 28;
 	}
 
 	@Override
@@ -35,9 +40,7 @@ public class FlatToggle extends Button {
 		var font = Minecraft.getInstance().font;
 		int swW = 22;
 		int swH = 12;
-		int textW = w - swW - 20;
-		g.text(font, Ui.ellipsize(font, getMessage().getString(), textW), x + 8, y + 6, Theme.TEXT, false);
-		g.text(font, Ui.ellipsize(font, description.getString(), textW), x + 8, y + 17, Theme.TEXT_FAINT, false);
+		Ui.rowText(g, font, getMessage().getString(), description.getString(), Theme.TEXT_FAINT, x + 8, y, textWidth(w));
 
 		int sx = x + w - swW - 8;
 		int sy = y + (h - swH) / 2;

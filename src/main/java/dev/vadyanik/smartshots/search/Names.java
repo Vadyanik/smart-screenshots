@@ -51,12 +51,24 @@ public final class Names {
 			if (rl != null) {
 				var item = BuiltInRegistries.ITEM.getOptional(rl);
 				if (item.isPresent()) {
-					return item.get().getName(item.get().getDefaultInstance()).getString();
+					return itemName(item.get());
 				}
 			}
 			String key = "item|" + id;
 			return fallback != null && fallback.containsKey(key) ? fallback.get(key) : path(id);
 		});
+	}
+
+	/**
+	 * Item components are only bound while a world is loaded: in the main menu
+	 * {@code getDefaultInstance()} throws, so fall back to the plain translation key.
+	 */
+	private static String itemName(net.minecraft.world.item.Item item) {
+		try {
+			return item.getName(item.getDefaultInstance()).getString();
+		} catch (RuntimeException e) {
+			return Component.translatable(item.getDescriptionId()).getString();
+		}
 	}
 
 	public static String biome(String id) {

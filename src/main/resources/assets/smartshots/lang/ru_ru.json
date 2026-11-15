@@ -28,6 +28,7 @@
   "smartshots.sidebar.others": "Другие сборки",
   "smartshots.gallery.title": "Скриншоты",
   "smartshots.gallery.loading": "Загрузка…",
+  "smartshots.gallery.scan_failed": "Не удалось прочитать папку скриншотов (подробности в логе)",
   "smartshots.gallery.empty": "Здесь пока пусто — нажмите F2 в игре",
   "smartshots.gallery.no_results": "Ничего не найдено",
   "smartshots.gallery.search_help": "Попробуйте: player:Ник · block:алмаз · mob:собака · item:меч · табличка:дом · чат:привет · type:авто · фрикам",

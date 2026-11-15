@@ -401,6 +401,15 @@ public class SettingsScreen extends Screen {
 			}, DEFAULT_NARRATION);
 			this.key = key;
 			this.auto = auto;
+			setHeight(Ui.rowHeight(Minecraft.getInstance().font, description(), textW()));
+		}
+
+		private String description() {
+			return Component.translatable(key + ".tooltip").getString();
+		}
+
+		private int textW() {
+			return getWidth() - 3 * 46 - 30;
 		}
 
 		private SmartShotsConfig.Notify get() {
@@ -424,10 +433,9 @@ public class SettingsScreen extends Screen {
 			var font = net.minecraft.client.Minecraft.getInstance().font;
 			int x = getX();
 			int y = getY();
-			g.text(font, getMessage(), x + 8, y + 6, Theme.TEXT, false);
-			g.text(font, Component.translatable(key + ".tooltip"), x + 8, y + 17, Theme.TEXT_FAINT, false);
+			Ui.rowText(g, font, getMessage().getString(), description(), Theme.TEXT_FAINT, x + 8, y, textW());
 			int segW = 46;
-			int sy = y + 8;
+			int sy = y + (getHeight() - 14) / 2;
 			Ui.rect(g, segX(0, segW) - 2, sy - 2, 3 * segW + 4, 18, Theme.SURFACE_2);
 			SmartShotsConfig.Notify[] all = SmartShotsConfig.Notify.values();
 			for (int i = 0; i < all.length; i++) {
@@ -472,6 +480,15 @@ public class SettingsScreen extends Screen {
 			this.get = get;
 			this.set = set;
 			setTooltip(Tooltip.create(Component.translatable("smartshots.settings." + key + ".tooltip")));
+			setHeight(Ui.rowHeight(Minecraft.getInstance().font, hint(), textW()));
+		}
+
+		private String hint() {
+			return Component.translatable("smartshots.settings." + key + ".hint").getString();
+		}
+
+		private int textW() {
+			return getWidth() - 8 - values.length * segW() - 14;
 		}
 
 		private String label(E v) {
@@ -497,11 +514,8 @@ public class SettingsScreen extends Screen {
 			int x = getX();
 			int y = getY();
 			int segW = segW();
-			int textW = segX(0, segW) - x - 14;
-			g.text(font, Ui.ellipsize(font, getMessage().getString(), textW), x + 8, y + 6, Theme.TEXT, false);
-			g.text(font, Ui.ellipsize(font, Component.translatable("smartshots.settings." + key + ".hint").getString(), textW),
-				x + 8, y + 17, Theme.TEXT_FAINT, false);
-			int sy = y + 8;
+			Ui.rowText(g, font, getMessage().getString(), hint(), Theme.TEXT_FAINT, x + 8, y, textW());
+			int sy = y + (getHeight() - 14) / 2;
 			Ui.rect(g, segX(0, segW) - 2, sy - 2, values.length * segW + 4, 18, Theme.SURFACE_2);
 			for (int i = 0; i < values.length; i++) {
 				int sx = segX(i, segW);
