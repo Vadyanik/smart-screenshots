@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.11.1+mc26.3
+- Public release: released into the public domain (Unlicense), README, links to the GitHub repository in the mod info.
+
 ## 1.11.0+mc26.3
 - Players screen (person button in the gallery): how many players you have met in total, how many are on
   your shots, and a ranking of who got on your screenshots most / least often. Search, sort, click a player
