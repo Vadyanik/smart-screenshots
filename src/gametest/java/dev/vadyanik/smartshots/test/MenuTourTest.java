@@ -26,6 +26,8 @@ import java.util.List;
  * so the UI can be reviewed remotely. Output: build/menu-tour/*.png
  */
 public class MenuTourTest implements FabricClientGameTest {
+	/** UI language of the tour: -Dsmartshots.tourLang=en_us (default ru_ru). */
+	private static final String LANG = System.getProperty("smartshots.tourLang", "ru_ru");
 	private static final Path OUT = Path.of(System.getProperty("smartshots.tourDir", "../../menu-tour")).toAbsolutePath();
 
 	private static void shot(ClientGameTestContext ctx, String name) {
@@ -38,8 +40,8 @@ public class MenuTourTest implements FabricClientGameTest {
 		ctx.getInput().resizeWindow(1280, 800);
 		ctx.runOnClient(mc -> {
 			mc.options.guiScale().set(2);
-			mc.options.languageCode = "ru_ru";
-			mc.getLanguageManager().setSelected("ru_ru");
+			mc.options.languageCode = LANG;
+			mc.getLanguageManager().setSelected(LANG);
 			mc.resizeGui();
 		});
 		ctx.runOnClient(mc -> mc.reloadResourcePacks());

@@ -61,4 +61,8 @@ tasks.matching { it.name == "runClientGameTest" }.configureEach {
 	if (System.getenv("TOUR_SDL_DRIVER") != null) {
 		environment "SDL_VIDEO_DRIVER", System.getenv("TOUR_SDL_DRIVER")
 	}
+	// UI language of the tour (TOUR_LANG=en_us), Russian by default.
+	if (System.getenv("TOUR_LANG") != null) {
+		jvmArgs "-Dsmartshots.tourLang=" + System.getenv("TOUR_LANG")
+	}
 }

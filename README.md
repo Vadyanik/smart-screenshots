@@ -7,7 +7,7 @@ remembers what was on each one, and gives you an in-game gallery to find, mark u
 
 English and Russian UI. Public domain ([Unlicense](LICENSE)): do whatever you want with it.
 
-![Viewer with the info panel](docs/viewer.png)
+![Viewer with the info panel](docs/screenshots/en/viewer.png)
 
 ## Features
 
@@ -38,7 +38,7 @@ sign text, visible chat lines, biome, coordinates, time of day and weather are s
 pixelate, spotlight, crop, stickers (items, mobs, player heads), captions and color filters. The original is
 kept, so every edit can be moved, erased or undone later.
 
-![Editor](docs/editor.png)
+![Editor](docs/screenshots/en/editor.png)
 
 **Sharing.** Copy a shot to the clipboard as an image, or upload it (catbox.moe, Litterbox, 0x0.st or any
 ShareX-style custom uploader) and copy the link. Both can happen automatically after F2.
