@@ -10,6 +10,7 @@ public final class SmartIcons {
 	public static final Identifier UNDO = ui("undo");
 	public static final Identifier REDO = ui("redo");
 	public static final Identifier MAP = ui("map");
+	public static final Identifier WAYPOINT = ui("waypoint");
 
 	private SmartIcons() {
 	}

@@ -415,7 +415,6 @@ public final class CaptureService {
 		GalleryScreen.onScreenshotAdded();
 		lastSaved = saved.file();
 		lastSavedMeta = saved.meta();
-		dev.vadyanik.smartshots.integration.XaeroBridge.refresh();
 		Trigger trigger = saved.meta().trigger();
 		SmartShotsConfig.Notify notify = switch (trigger) {
 			case MANUAL -> SmartShotsConfig.get().manualNotify;

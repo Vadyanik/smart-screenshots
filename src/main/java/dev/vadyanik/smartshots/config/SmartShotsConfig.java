@@ -41,6 +41,8 @@ public final class SmartShotsConfig {
 
 	/** Worlds / servers / sub-worlds where new players are ignored (see storage.MeetBlacklist). */
 	public java.util.List<String> meetBlacklist = new java.util.ArrayList<>();
+	/** Ids of the built-in blocked places (server lobbies) the user turned back on. */
+	public java.util.List<String> meetBuiltinOff = new java.util.ArrayList<>();
 
 	/** Record visible blocks / entities / players for search. */
 	public boolean sceneAnalysis = true;
@@ -92,20 +94,10 @@ public final class SmartShotsConfig {
 	/** The user agreed that "Share" puts images on a public host (asked once). */
 	public boolean shareConfirmed = false;
 
-	/** Log the player's movement to movement-log/ (see track.MovementLog). */
-	public boolean trackEnabled = true;
-	/** Sample interval of the movement log, in ticks (20 = once a second). */
-	public int trackIntervalTicks = 5;
-
 	/** Editor caption template ({date}, {time}, {x}, {y}, {z}, {world}, {dimension}, {biome}, {player}). */
 	public String captionTemplate = "{date} {time} · {world} · {x} {y} {z} · {biome}";
 	/** Caption corner: 0 top left, 1 top right, 2 bottom left, 3 bottom right. */
 	public int captionCorner = 3;
-
-	/** Show screenshots as waypoints in Xaero's Minimap / World Map (temporary, not saved by Xaero). */
-	public boolean xaeroWaypoints = true;
-	/** Include interval (auto) shots in those waypoints. */
-	public boolean xaeroIncludeAuto = false;
 
 	public enum Notify { NONE, TOAST, CHAT }
 
@@ -184,6 +176,9 @@ public final class SmartShotsConfig {
 		if (meetBlacklist == null) {
 			meetBlacklist = new java.util.ArrayList<>();
 		}
+		if (meetBuiltinOff == null) {
+			meetBuiltinOff = new java.util.ArrayList<>();
+		}
 		if (autoNotify == null) {
 			autoNotify = Notify.TOAST;
 		}
@@ -201,7 +196,6 @@ public final class SmartShotsConfig {
 		}
 		captionTemplate = captionTemplate == null ? "" : captionTemplate;
 		captionCorner = Math.clamp(captionCorner, 0, 3);
-		trackIntervalTicks = Math.clamp(trackIntervalTicks, 1, 100);
 		customUploadUrl = customUploadUrl == null ? "" : customUploadUrl.strip();
 		customUploadField = customUploadField == null || customUploadField.isBlank() ? "file" : customUploadField.strip();
 		customUploadHeaders = customUploadHeaders == null ? "" : customUploadHeaders;

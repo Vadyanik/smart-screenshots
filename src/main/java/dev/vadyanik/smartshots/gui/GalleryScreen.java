@@ -193,7 +193,7 @@ public class GalleryScreen extends Screen {
 		gridH = this.height - gridY - FOOTER_H;
 
 		searchX = sidebarW + PAD;
-		searchW = this.width - searchX - PAD - 3 * 22 - 4;
+		searchW = this.width - searchX - PAD - 4 * 22 - 4;
 		String old = search != null ? search.getValue() : savedQuery;
 		search = FlatEditBox.create(this.font, searchX, 6, searchW, 20, true, Component.translatable("smartshots.search.narration"));
 		search.setMaxLength(256);
@@ -202,7 +202,10 @@ public class GalleryScreen extends Screen {
 		search.setResponder(this::onSearchChanged);
 		addRenderableWidget(search);
 
-		int bx = this.width - PAD - 3 * 22 + 2;
+		int bx = this.width - PAD - 4 * 22 + 2;
+		FlatButton players = FlatButton.icon(bx, 6, Ui.PERSON, playersTooltip(), b -> minecraft.gui.setScreen(new PlayersScreen(this)));
+		addRenderableWidget(players);
+		bx += 22;
 		addRenderableWidget(FlatButton.icon(bx, 6, Ui.SETTINGS, Component.translatable("smartshots.button.settings"),
 			b -> minecraft.gui.setScreen(new SettingsScreen(this))));
 		addRenderableWidget(FlatButton.icon(bx + 22, 6, Ui.FOLDER, Component.translatable("smartshots.button.open_folder"), b -> openFolder()));
@@ -214,6 +217,12 @@ public class GalleryScreen extends Screen {
 			onLibraryReady();
 		}
 		scanOthers();
+	}
+
+	private static Component playersTooltip() {
+		dev.vadyanik.smartshots.storage.SeenPlayers.refresh();
+		int n = dev.vadyanik.smartshots.storage.SeenPlayers.count();
+		return n > 0 ? Component.translatable("smartshots.button.players.count", n) : Component.translatable("smartshots.button.players");
 	}
 
 	private void openFolder() {

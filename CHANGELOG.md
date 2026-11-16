@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.11.0+mc26.3
+- Players screen (person button in the gallery): how many players you have met in total, how many are on
+  your shots, and a ranking of who got on your screenshots most / least often. Search, sort, click a player
+  to see their shots.
+- Viewer info panel: long lists (players, mobs, items, blocks, tags) are collapsed to two rows with an
+  "N more" chip that expands them; section titles show how many things there are.
+- Xaero: screenshots no longer put waypoints on the map by themselves. The viewer has a button that adds a
+  normal (saved) Xaero waypoint where the shot was taken.
+- The PepeLand lobby is excluded from new-player detection by default (can be turned back on in Settings).
+- Removed the movement / inventory log.
+
 ## 1.10.3+mc26.3
 - Auto shots are taken on round wall-clock times (every 10 min: 19:10, 19:20...; every 5 min: 19:05, 19:10...).
   Boundaries missed during a pause/menu/unfocus collapse into one shot when you're back.

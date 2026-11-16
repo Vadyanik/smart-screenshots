@@ -9,7 +9,6 @@ import dev.vadyanik.smartshots.gui.GalleryScreen;
 import dev.vadyanik.smartshots.gui.ShareConfirmScreen;
 import dev.vadyanik.smartshots.share.ShareService;
 import dev.vadyanik.smartshots.storage.ShotArchiver;
-import dev.vadyanik.smartshots.track.MovementLog;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -46,7 +45,6 @@ public class SmartShots implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(SmartShots::onTick);
 		ShotArchiver.start();
-		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> MovementLog.shutdown());
 	}
 
 	private static void onTick(Minecraft mc) {
@@ -85,16 +83,6 @@ public class SmartShots implements ClientModInitializer {
 			});
 		}
 		CaptureScheduler.tick(mc);
-		try {
-			dev.vadyanik.smartshots.integration.XaeroBridge.tick(mc);
-		} catch (Throwable e) {
-			LOGGER.debug("Xaero integration failed", e);
-		}
-		try {
-			MovementLog.tick(mc);
-		} catch (Exception e) {
-			LOGGER.warn("Movement log failed", e);
-		}
 	}
 
 	public static Identifier id(String path) {

@@ -136,6 +136,34 @@ public final class SeenPlayers {
 		return k == null ? 0 : k.uuids.size();
 	}
 
+	/** A met player as stored on disk; {@code first} is when they were met (epoch ms). */
+	public record Met(String uuid, String name, long first) {
+	}
+
+	/** Everyone met, read in the background (the unsaved ones included). */
+	public static java.util.concurrent.CompletableFuture<List<Met>> list() {
+		return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+			List<Met> out = new ArrayList<>();
+			Set<String> have = new HashSet<>();
+			try {
+				for (Entry e : read().players) {
+					if (e.uuid == null || have.add(e.uuid.toLowerCase(Locale.ROOT))) {
+						out.add(new Met(e.uuid, e.name == null ? "" : e.name, e.first));
+					}
+				}
+			} catch (IOException e) {
+				SmartShots.LOGGER.warn("Couldn't read the met players list", e);
+			}
+			long now = System.currentTimeMillis();
+			UNSAVED.forEach((uuid, name) -> {
+				if (have.add(uuid.toString())) {
+					out.add(new Met(uuid.toString(), name, now));
+				}
+			});
+			return out;
+		}, IO);
+	}
+
 	/** Re-read the file in the background if another instance changed it. Cheap to call often. */
 	public static void refresh() {
 		if (refreshQueued) {

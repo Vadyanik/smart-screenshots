@@ -108,21 +108,6 @@ public class SettingsScreen extends Screen {
 			hrs -> Component.translatable("smartshots.settings.hours", hrs).getString(), v -> c.litterboxHours = v), y);
 		y = add(new CustomUploadRow(colX, colW, this), y);
 
-		y = section(y, "smartshots.settings.section.xaero");
-		y = add(toggle("xaero_waypoints", () -> c.xaeroWaypoints, v -> {
-			c.xaeroWaypoints = v;
-			dev.vadyanik.smartshots.integration.XaeroBridge.refresh();
-		}), y);
-		y = add(toggle("xaero_auto", () -> c.xaeroIncludeAuto, v -> {
-			c.xaeroIncludeAuto = v;
-			dev.vadyanik.smartshots.integration.XaeroBridge.refresh();
-		}), y);
-
-		y = section(y, "smartshots.settings.section.track");
-		y = add(toggle("track_enabled", () -> c.trackEnabled, v -> c.trackEnabled = v), y);
-		y = add(choiceSlider("track_interval", TRACK_TICKS, c.trackIntervalTicks,
-			t -> Component.translatable("smartshots.settings.seconds", fmt(t / 20f)).getString(), v -> c.trackIntervalTicks = v), y);
-		y = add(new TrackFolderRow(colX, colW), y);
 
 		y = section(y, "smartshots.settings.section.toast");
 		y = add(new FlatSlider(colX, 0, colW, Component.translatable("smartshots.settings.toast_size_label"),
@@ -157,7 +142,6 @@ public class SettingsScreen extends Screen {
 	private static final int[] ARCHIVE_DAYS = {7, 14, 30, 60, 90, 180, 365};
 	private static final int[] MEET_COOLDOWNS = {0, 10, 15, 30, 60, 120, 300};
 	private static final int[] LITTERBOX_HOURS = {1, 12, 24, 72};
-	private static final int[] TRACK_TICKS = {1, 2, 5, 10, 20, 40};
 
 	/** Discrete slider over {@code choices}; starts at the choice closest to {@code current}. */
 	private FlatSlider choiceSlider(String key, int[] choices, int current, IntFunction<String> label, IntConsumer set) {
@@ -580,40 +564,6 @@ public class SettingsScreen extends Screen {
 			g.text(font, Ui.ellipsize(font, getMessage().getString(), textW), x + 8, y + 6, Theme.TEXT, false);
 			String line = url.isBlank() ? Component.translatable("smartshots.settings.custom_upload.none").getString() : url;
 			g.text(font, Ui.ellipsize(font, line, textW), x + 8, y + 17, Theme.TEXT_FAINT, false);
-			Ui.rect(g, px, y + 7, pw, 16, Theme.SURFACE_3);
-			g.text(font, pill, px + 8, y + 11, Theme.TEXT, false);
-		}
-	}
-
-	/** Opens the movement log folder. */
-	private static final class TrackFolderRow extends net.minecraft.client.gui.components.Button {
-		TrackFolderRow(int x, int w) {
-			super(x, 0, w, 30, Component.translatable("smartshots.settings.track_folder"), b -> {
-				java.nio.file.Path dir = dev.vadyanik.smartshots.track.MovementLog.root();
-				try {
-					java.nio.file.Files.createDirectories(dir);
-				} catch (java.io.IOException ignored) {
-				}
-				com.mojang.blaze3d.Blaze3D.openPath(dir);
-			}, DEFAULT_NARRATION);
-			setTooltip(Tooltip.create(Component.translatable("smartshots.settings.track_folder.tooltip")));
-		}
-
-		@Override
-		protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
-			var font = Minecraft.getInstance().font;
-			int x = getX();
-			int y = getY();
-			int w = getWidth();
-			if (isHoveredOrFocused()) {
-				Ui.rect(g, x, y, w, getHeight(), Theme.HOVER);
-			}
-			String pill = Component.translatable("smartshots.button.open_folder").getString();
-			int pw = font.width(pill) + 16;
-			int px = x + w - 8 - pw;
-			int textW = px - x - 16;
-			g.text(font, Ui.ellipsize(font, getMessage().getString(), textW), x + 8, y + 6, Theme.TEXT, false);
-			g.text(font, Ui.ellipsize(font, dev.vadyanik.smartshots.track.MovementLog.DIR + "/", textW), x + 8, y + 17, Theme.TEXT_FAINT, false);
 			Ui.rect(g, px, y + 7, pw, 16, Theme.SURFACE_3);
 			g.text(font, pill, px + 8, y + 11, Theme.TEXT, false);
 		}

@@ -39,6 +39,10 @@ public class ViewerScreen extends Screen {
 	private static final int TOP_H = 32;
 	private static final int CHIP_H = 16;
 	private static final int ICON = 12;
+	/** Rows a long chip list shows before "N more". */
+	private static final int COLLAPSED_ROWS = 2;
+	/** Collapse only when at least this many chips would be hidden. */
+	private static final int MIN_HIDDEN = 3;
 	/** A LMB click on the image waits this long so a double click (zoom) doesn't toggle anything. */
 	private static final long PICK_DELAY_MS = 260;
 	private static final double DRAG_SLOP = 3;
@@ -54,6 +58,8 @@ public class ViewerScreen extends Screen {
 	private boolean dragging;
 	private int infoW;
 	private double infoScroll;
+	/** Info sections the user expanded (long chip lists start collapsed); kept while the viewer is open. */
+	private final java.util.Set<String> expanded = new java.util.HashSet<>();
 	private int infoContentH;
 	private final List<TagChip> tagChips = new ArrayList<>();
 	private FlatButton favButton;
@@ -123,6 +129,10 @@ public class ViewerScreen extends Screen {
 			addRenderableWidget(FlatButton.icon(x, 6, SmartIcons.MAP, Component.translatable("smartshots.viewer.map"), b -> openMap()));
 			x -= 22;
 		}
+		if (XaeroBridge.minimapLoaded()) {
+			addRenderableWidget(FlatButton.icon(x, 6, SmartIcons.WAYPOINT, Component.translatable("smartshots.viewer.waypoint"), b -> addWaypoint()));
+			x -= 22;
+		}
 		addRenderableWidget(FlatButton.icon(x, 6, Ui.NOTE, Component.translatable("smartshots.viewer.note"),
 			b -> openNote()));
 		x -= 22;
@@ -185,6 +195,31 @@ public class ViewerScreen extends Screen {
 		}
 	}
 
+	/** A saved Xaero waypoint where the shot was taken (only for the world and dimension being played). */
+	public void addWaypoint() {
+		if (shots.isEmpty() || !XaeroBridge.minimapLoaded()) {
+			return;
+		}
+		ShotMeta m = shot().meta;
+		shareOk = false;
+		shareAt = System.currentTimeMillis();
+		if (m.dimension == null || !XaeroBridge.isCurrentPlace(shot().file, m)) {
+			shareStatus = Component.translatable("smartshots.viewer.waypoint.elsewhere");
+			return;
+		}
+		switch (XaeroBridge.addWaypoint(m)) {
+			case ADDED -> {
+				shareStatus = Component.translatable("smartshots.viewer.waypoint.added", XaeroBridge.waypointName(m));
+				shareOk = true;
+			}
+			case EXISTS -> {
+				shareStatus = Component.translatable("smartshots.viewer.waypoint.exists");
+				shareOk = true;
+			}
+			case FAILED -> shareStatus = Component.translatable("smartshots.viewer.waypoint.failed");
+		}
+	}
+
 	public void openNote() {
 		minecraft.gui.setScreen(new NoteScreen(this, shot()));
 	}
@@ -200,14 +235,12 @@ public class ViewerScreen extends Screen {
 		ShotMeta m = shot().meta;
 		m.favorite = !m.favorite;
 		ScreenshotStore.updateMeta(shot().file, m);
-		XaeroBridge.refresh();
 		updateFavButton();
 	}
 
 	void saveNote(String note) {
 		shot().meta.note = note;
 		ScreenshotStore.updateMeta(shot().file, shot().meta);
-		XaeroBridge.refresh();
 		GalleryScreen.markDirty();
 	}
 
@@ -217,8 +250,7 @@ public class ViewerScreen extends Screen {
 			Textures.forget(s.file);
 			ScreenshotStore.delete(s.file, () -> {
 				GalleryScreen.markDirty();
-				XaeroBridge.refresh();
-				if (GalleryScreen.library != null) {
+						if (GalleryScreen.library != null) {
 					GalleryScreen.library.shots.remove(s);
 					s.location.shots.remove(s);
 				}
@@ -509,7 +541,7 @@ public class ViewerScreen extends Screen {
 		}
 		List<ChipData> blocks = new ArrayList<>();
 		for (String id : m.blocks.keySet()) {
-			if (blocks.size() >= 24) {
+			if (blocks.size() >= 300) {
 				break;
 			}
 			Integer n = m.blockCounts != null ? m.blockCounts.get(id) : null;
@@ -525,20 +557,20 @@ public class ViewerScreen extends Screen {
 			}
 		}
 		if (!players.isEmpty()) {
-			y = section(g, x, y, "smartshots.info.players");
-			y = chipRow(g, m, x, y, w, players, mouseX, mouseY) + 8;
+			y = section(g, x, y, "smartshots.info.players", players.size());
+			y = chipRow(g, m, x, y, w, players, mouseX, mouseY, "players") + 8;
 		}
 		if (!entities.isEmpty()) {
-			y = section(g, x, y, "smartshots.info.entities");
-			y = chipRow(g, m, x, y, w, entities, mouseX, mouseY) + 8;
+			y = section(g, x, y, "smartshots.info.entities", entities.size());
+			y = chipRow(g, m, x, y, w, entities, mouseX, mouseY, "entities") + 8;
 		}
 		if (!items.isEmpty()) {
-			y = section(g, x, y, "smartshots.info.items");
-			y = chipRow(g, m, x, y, w, items, mouseX, mouseY) + 8;
+			y = section(g, x, y, "smartshots.info.items", items.size());
+			y = chipRow(g, m, x, y, w, items, mouseX, mouseY, "items") + 8;
 		}
 		if (!blocks.isEmpty()) {
-			y = section(g, x, y, "smartshots.info.blocks");
-			y = chipRow(g, m, x, y, w, blocks, mouseX, mouseY) + 8;
+			y = section(g, x, y, "smartshots.info.blocks", blocks.size());
+			y = chipRow(g, m, x, y, w, blocks, mouseX, mouseY, "blocks") + 8;
 		}
 
 		if (signs) {
@@ -595,7 +627,7 @@ public class ViewerScreen extends Screen {
 				}
 				tags.add(new ChipData(Names.tag(tg), "tag:" + Highlights.quote(tg), Theme.TEXT_DIM, null));
 			}
-			y = chipRow(g, m, x, y, w, tags, mouseX, mouseY) + 8;
+			y = chipRow(g, m, x, y, w, tags, mouseX, mouseY, "tags") + 8;
 		}
 
 		if (!m.note.isBlank()) {
@@ -637,6 +669,16 @@ public class ViewerScreen extends Screen {
 		return y + 12;
 	}
 
+	/** A section title with the number of things in it. */
+	private int section(GuiGraphicsExtractor g, int x, int y, String key, int count) {
+		String title = Component.translatable(key).getString().toUpperCase(GalleryScreen.gameLocale());
+		g.text(font, title, x, y, Theme.TEXT_FAINT, false);
+		if (count > 1) {
+			g.text(font, String.valueOf(count), x + font.width(title) + 5, y, Theme.alpha(Theme.TEXT_FAINT, 0.7f), false);
+		}
+		return y + 12;
+	}
+
 	private int wrapped(GuiGraphicsExtractor g, String text, int x, int y, int w, int color) {
 		for (var line : font.split(Component.literal(text), w)) {
 			g.text(font, line, x, y, color, false);
@@ -646,6 +688,69 @@ public class ViewerScreen extends Screen {
 	}
 
 	private int chipRow(GuiGraphicsExtractor g, ShotMeta m, int x0, int y, int w, List<ChipData> chips, int mouseX, int mouseY) {
+		return chipRow(g, m, x0, y, w, chips, mouseX, mouseY, null);
+	}
+
+	/** Chip width as {@link #chipRow} lays it out. */
+	private int chipWidth(ChipData c, int w) {
+		boolean pic = c.key != null && ChipIcons.has(c.key);
+		int lead = pic ? 3 + ICON + 4 : 13;
+		int cw = (c.styled != null ? font.width(c.styled.getVisualOrderText()) : font.width(c.label)) + lead + 5;
+		return Math.min(cw, w);
+	}
+
+	/**
+	 * Lays out chips in rows. With a {@code section} id, a list longer than {@link #COLLAPSED_ROWS}
+	 * rows is cut there and ends with a "N more" chip; clicking it expands the section (and back).
+	 */
+	private int chipRow(GuiGraphicsExtractor g, ShotMeta m, int x0, int y, int w, List<ChipData> chips, int mouseX, int mouseY, String section) {
+		String toggle = null;
+		if (section != null) {
+			// Which row each chip lands on.
+			int rows = 1;
+			int x = x0;
+			int[] rowOf = new int[chips.size()];
+			int[] widths = new int[chips.size()];
+			for (int i = 0; i < chips.size(); i++) {
+				int cw = widths[i] = chipWidth(chips.get(i), w);
+				if (x + cw > x0 + w && x != x0) {
+					x = x0;
+					rows++;
+				}
+				rowOf[i] = rows - 1;
+				x += cw + 3;
+			}
+			if (rows > COLLAPSED_ROWS) {
+				int keep = 0;
+				while (keep < chips.size() && rowOf[keep] < COLLAPSED_ROWS) {
+					keep++;
+				}
+				// Room for the "more" chip at the end of the last row.
+				String more = null;
+				while (keep > 0) {
+					more = Component.translatable("smartshots.info.more", chips.size() - keep).getString();
+					int end = x0;
+					for (int i = 0; i < keep; i++) {
+						if (rowOf[i] == COLLAPSED_ROWS - 1) {
+							end += widths[i] + 3;
+						}
+					}
+					if (rowOf[keep - 1] < COLLAPSED_ROWS - 1 || end + font.width(more) + 10 <= x0 + w) {
+						break;
+					}
+					keep--;
+				}
+				// Hiding just one or two isn't worth a click.
+				if (chips.size() - keep >= MIN_HIDDEN) {
+					if (expanded.contains(section)) {
+						toggle = Component.translatable("smartshots.info.collapse").getString();
+					} else {
+						toggle = more;
+						chips = chips.subList(0, keep);
+					}
+				}
+			}
+		}
 		int x = x0;
 		int h = CHIP_H;
 		for (ChipData c : chips) {
@@ -695,6 +800,17 @@ public class ViewerScreen extends Screen {
 			tagChips.add(new TagChip(x, y, cw, h, c.query, c.key));
 			x += cw + 3;
 		}
+		if (toggle != null) {
+			int cw = font.width(toggle) + 10;
+			if (x + cw > x0 + w && x != x0) {
+				x = x0;
+				y += h + 3;
+			}
+			boolean hover = mouseX >= x && mouseX < x + cw && mouseY >= y && mouseY < y + h && mouseY > TOP_H;
+			Ui.rect(g, x, y, cw, h, hover ? Theme.SURFACE_3 : Theme.alpha(Theme.ACCENT, 0.12f));
+			g.text(font, toggle, x + 5, y + (h - 8) / 2, hover ? Theme.TEXT : Theme.ACCENT, false);
+			tagChips.add(new TagChip(x, y, cw, h, "\u0000more:" + section, null));
+		}
 		return y + h + 2;
 	}
 
@@ -714,6 +830,17 @@ public class ViewerScreen extends Screen {
 		if (showInfo && mx >= width - infoW && my > TOP_H) {
 			for (TagChip c : tagChips) {
 				if (c.hit(mx, my)) {
+					if (c.query.startsWith("\u0000more:")) {
+						if (button != InputConstants.MOUSE_BUTTON_LEFT) {
+							return false;
+						}
+						Button.playButtonClickSound(minecraft.getSoundManager());
+						String section = c.query.substring(6);
+						if (!expanded.remove(section)) {
+							expanded.add(section);
+						}
+						return true;
+					}
 					if (c.query.equals("\u0000copy")) {
 						if (button != InputConstants.MOUSE_BUTTON_LEFT) {
 							return false;

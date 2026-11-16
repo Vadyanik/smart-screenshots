@@ -117,6 +117,17 @@ public class MenuTourTest implements FabricClientGameTest {
 			ctx.runOnClient(mc -> {
 				if (mc.gui.screen() instanceof GalleryScreen g) {
 					g.searchFor("");
+					mc.gui.setScreen(new dev.vadyanik.smartshots.gui.PlayersScreen(g));
+				}
+			});
+			ctx.waitTicks(20);
+			shot(ctx, "07b_players");
+			ctx.runOnClient(mc -> mc.gui.screen().onClose());
+			ctx.waitTicks(2);
+
+			ctx.runOnClient(mc -> {
+				if (mc.gui.screen() instanceof GalleryScreen g) {
+					g.searchFor("");
 					g.openFirst();
 				}
 			});
